@@ -1,14 +1,22 @@
-# job1_data_extraction.py
 import time
-import random
+import pandas as pd
+
+
 
 def run():
     print("ジョブ1: データ抽出を開始します...")
     time.sleep(2) # 処理をシミュレート
     
-    # 確率で失敗するようにしてみましょう
-    if random.random() < 0.1: # 10%の確率で失敗
-        raise Exception("データソースへの接続に失敗しました。")
+    data = {
+        'id':[1,2,3,4],
+        'name':['Aさん', 'Bさん', 'Cさん', 'Dさん'],
+        'sales':[120,200,65,99,],
+        'status':['OK', 'NO', 'NO', 'OK']
+    }
+    
+    df = pd.DataFrame(data)
+    
+    df.to_csv('temp_data.csv', index=False)
 
     print("ジョブ1: データを正常に抽出しました。")
     return True

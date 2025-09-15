@@ -1,29 +1,25 @@
-# job_manager.py
 import datetime
 import smtplib
 from email.mime.text import MIMEText
 
-# --- 設定 ---
 JOBS = [
     {"name": "ジョブ1", "module": "job1_data_extraction"},
     {"name": "ジョブ2", "module": "job2_data_processing"},
     {"name": "ジョブ3", "module": "job3_data_loading"},
 ]
 
-# メール通知の設定
-SENDER_EMAIL = "your_email@gmail.com" # 送信元メールアドレス
-SENDER_PASSWORD = "your_app_password" # アプリパスワード
-RECEIVER_EMAIL = "receiver_email@example.com" # 送信先メールアドレス
+SENDER_EMAIL = "your_email@gmail.com" 
+SENDER_PASSWORD = "your_app_password" 
+RECEIVER_EMAIL = "receiver_email@example.com" 
 
 def send_notification(subject, body):
-    """メールを送信する関数"""
     msg = MIMEText(body)
     msg['Subject'] = subject
     msg['From'] = SENDER_EMAIL
     msg['To'] = RECEIVER_EMAIL
 
     try:
-        # GmailのSMTPサーバーを使用する場合
+        # Gmail用
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
             smtp.login(SENDER_EMAIL, SENDER_PASSWORD)
             smtp.send_message(msg)
@@ -32,7 +28,6 @@ def send_notification(subject, body):
         print(f"メール送信に失敗しました: {e}")
 
 def run_job_flow():
-    """ジョブフローを実行するメイン関数"""
     print("--- ジョブフローを開始します ---")
     log_file_name = f"log_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
     
@@ -46,7 +41,6 @@ def run_job_flow():
             log_file.write(f"\n--- {job_name}の実行を開始 --- ({datetime.datetime.now()})\n")
             
             try:
-                # 動的にモジュールをインポート
                 module = __import__(module_name)
                 module.run()
                 
@@ -58,7 +52,6 @@ def run_job_flow():
                 print(error_message)
                 log_file.write(error_message)
                 
-                # 失敗時の通知
                 subject = f"[ジョブ失敗] {job_name}が失敗しました"
                 body = f"ジョブ名: {job_name}\nエラー内容: {e}\n\nログファイル: {log_file_name}"
                 send_notification(subject, body)
