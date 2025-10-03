@@ -1,0 +1,17 @@
+# 仮想環境
+.venv/
+
+# 機密情報 (API Keys, Credentials)
+*.json
+keys/
+credentials/
+*.env
+
+# データファイルと一時的な出力
+*.csv
+processed_weather_forecast.csv
+weather_forecast.csv
+
+# OSやエディタのファイル
+.DS_Store
+.vscode/
