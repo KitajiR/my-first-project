@@ -1,10 +1,18 @@
 import pandas as pd
 import requests
+import os
+
+API_KEY = os.environ.get('WEATHER_API_KEY')
+if not API_KEY:
+    raise ValueError("環境変数 'WEATHER_API_KEY' が設定されていません。")
 
 def run():
     print('ジョブ1:抽出を開始します')
-    res = requests.get('https://weather.googleapis.com/v1/forecast/days:lookup?key=AIzaSyCI7dw-34eQdYDN4AbOBiDOlUFYACJWELc&location.latitude=21.3&location.longitude=-157.8')
-    #print('レスポンスレコード：',res.status_code)
+    
+    url = f'https://weather.googleapis.com/v1/forecast/days:lookup?key={API_KEY}&location.latitude=21.3&location.longitude=-157.8'
+    res = requests.get(url)
+    
+    print('レスポンスレコード：',res.status_code)
     if res.status_code == 200:
         data = res.json()
      

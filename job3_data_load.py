@@ -1,8 +1,5 @@
 import pandas as pd
-import os
 from google.cloud import bigquery
-
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] =  '/Users/kitajimaryuunosuke/Desktop/GCP_Folder/main-sphere-472405-g3-d6388ae7ab26.json' 
 
 def run():
     print("ジョブ3:BigQueryへのロードを開始します。")

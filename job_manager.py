@@ -1,67 +1,46 @@
-import datetime
-import smtplib
-from email.mime.text import MIMEText
+import subprocess
+import sys
+import os
 
-JOBS = [
-    {"name": "ジョブ1", "module": "job1_data_extraction"},
-    {"name": "ジョブ2", "module": "job2_data_processing"},
-    {"name": "ジョブ3", "module": "job3_data_loading"},
-]
-
-SENDER_EMAIL = "your_email@gmail.com" 
-SENDER_PASSWORD = "your_app_password" 
-RECEIVER_EMAIL = "receiver_email@example.com" 
-
-def send_notification(subject, body):
-    msg = MIMEText(body)
-    msg['Subject'] = subject
-    msg['From'] = SENDER_EMAIL
-    msg['To'] = RECEIVER_EMAIL
+def run_job(script_name):
+    python_executable = sys.executable
+    
+    command = [python_executable, script_name]
+    
+    print(f"\n---ジョブ開始:{script_name}---")
 
     try:
-        # Gmail用
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-            smtp.login(SENDER_EMAIL, SENDER_PASSWORD)
-            smtp.send_message(msg)
-        print(f"メールを送信しました: {subject}")
-    except Exception as e:
-        print(f"メール送信に失敗しました: {e}")
+        result = subprocess.run(command, check=True, capture_output=True, text=True, encoding='utf-8')
+
+        print(result.stdout)
+        print(f"---ジョブ成功:{script_name}---")
+        
+    #失敗したらパイプライン停止    
+    except subprocess.CalledProcessError as e:
+        print(f'---ジョブ失敗:{script_name}---')
+        print(f"エラーコード:{e.returncode}")
+        print("標準エラー出力:\n", e.stderr)
+        sys.exit(1)
 
 def run_job_flow():
-    print("--- ジョブフローを開始します ---")
-    log_file_name = f"log_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
     
-    with open(log_file_name, "w") as log_file:
-        log_file.write(f"ジョブフロー開始: {datetime.datetime.now()}\n")
-        
-        for job in JOBS:
-            job_name = job["name"]
-            module_name = job["module"]
-            
-            log_file.write(f"\n--- {job_name}の実行を開始 --- ({datetime.datetime.now()})\n")
-            
-            try:
-                module = __import__(module_name)
-                module.run()
-                
-                log_file.write(f"--- {job_name}が正常に完了しました --- ({datetime.datetime.now()})\n")
-                
-            except Exception as e:
-                error_message = f"--- {job_name}が失敗しました --- ({datetime.datetime.now()})\n"
-                error_message += f"エラー: {e}\n"
-                print(error_message)
-                log_file.write(error_message)
-                
-                subject = f"[ジョブ失敗] {job_name}が失敗しました"
-                body = f"ジョブ名: {job_name}\nエラー内容: {e}\n\nログファイル: {log_file_name}"
-                send_notification(subject, body)
-                
-                print("--- ジョブフローを中断します ---")
-                return # 失敗したらそこで終了
-        
-        log_file.write(f"\nジョブフロー完了: {datetime.datetime.now()}\n")
+    jobs = [
+        'job1_data_extraction.py',
+        'job2_data_processing.py',
+        'job3_data_load.py'
+    ]
     
-    print("--- ジョブフローが正常に完了しました ---")
+    if not os.environ.get('WEATHER_API_KEY') or not os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'):
+       print("\n--- 認証エラー ---")   
+       print("APIキーまたは、BigQueryの認証情報が設定されていません")
+       sys.exit(1)
+       
+    print("--- ジョブフローを開始します ---")   
+    
+    for job in jobs:
+        run_job(job)
+    
+    print("--- ジョブフロー実行完了！ ---")
 
 if __name__ == "__main__":
     run_job_flow()

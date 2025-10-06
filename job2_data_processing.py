@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 def run():
     print("ジョブ2: データ処理を開始します...")
 
